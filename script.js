@@ -587,6 +587,10 @@ function renderFinanceSummary() {
             <span class="result-value">${formatEuro(foerder.maxKredit)}</span>
         </div>
         <div class="result-item">
+            <span class="result-label">Baubegleitung max. Kredit (${baubegleitung.regelLabel})</span>
+            <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
+        </div>
+        <div class="result-item">
             <span class="result-label">Max. Kredit gesamt</span>
             <span class="result-value">${formatEuro(gesamtMaxKredit)}</span>
         </div>
@@ -605,10 +609,6 @@ function renderFinanceSummary() {
         <div class="result-item">
             <span class="result-label">Max. Zuschuss je Wohneinheit</span>
             <span class="result-value">${formatEuro(maxZuschussJeWEEffektiv)}</span>
-        </div>
-        <div class="result-item">
-            <span class="result-label">Baubegleitung max. Kredit (${baubegleitung.regelLabel})</span>
-            <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
         </div>
         <div class="result-item">
             <span class="result-label">Baubegleitung max. Tilgungszuschuss</span>
