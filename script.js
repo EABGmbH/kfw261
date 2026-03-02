@@ -40,6 +40,34 @@ let aktuelleKfw261ReferenzZins = DEFAULT_KFW261_REFERENZ_ZINS;
 let aktuelleInterhypReferenzZins = DEFAULT_INTERHYP_REFERENZ_ZINS;
 let zinsQuelleStandText = new Date().toLocaleDateString('de-DE');
 
+function getScriptBaseUrl() {
+    const script = document.querySelector('script[src$="script.js"]');
+    if (script && script.src) {
+        try {
+            return new URL('.', script.src).toString();
+        } catch (_error) {
+            return '';
+        }
+    }
+
+    try {
+        return new URL('.', window.location.href).toString();
+    } catch (_error) {
+        return '';
+    }
+}
+
+function resolveAssetUrl(path) {
+    const baseUrl = getScriptBaseUrl();
+    if (!baseUrl) return path;
+
+    try {
+        return new URL(path, baseUrl).toString();
+    } catch (_error) {
+        return path;
+    }
+}
+
 const huelleStufen = {
     1: {
         title: 'Stufe 1: Ich will nicht viel machen',
@@ -483,8 +511,8 @@ function formatStandDateForDisplay(value) {
 
 async function loadDynamicRateReferences() {
     const [kfwResult, interhypResult] = await Promise.allSettled([
-        fetch('data/kfw/261.json', { cache: 'no-store' }),
-        fetch('data/market/interhyp_10y_ltv_gt90.json', { cache: 'no-store' })
+        fetch(resolveAssetUrl('data/kfw/261.json'), { cache: 'no-store' }),
+        fetch(resolveAssetUrl('data/market/interhyp_10y_ltv_gt90.json'), { cache: 'no-store' })
     ]);
 
     if (kfwResult.status === 'fulfilled' && kfwResult.value.ok) {
@@ -815,10 +843,10 @@ async function generatePdfReport() {
     }
 
     const [titleImage, logoImage, qrImage, ablaufImage] = await Promise.all([
-        loadImageAsDataUrl('titelblatt.png', { format: 'image/jpeg', quality: 0.64, maxWidth: 1200, maxHeight: 1700 }),
-        loadImageAsDataUrl('logo.png', { format: 'image/png', maxWidth: 800, maxHeight: 450 }),
-        loadImageAsDataUrl('homepagestatistik.png', { format: 'image/png', maxWidth: 700, maxHeight: 700 }),
-        loadImageAsDataUrl('kfwablauf.png', { format: 'image/jpeg', quality: 0.66, maxWidth: 1200, maxHeight: 1700 })
+        loadImageAsDataUrl(resolveAssetUrl('titelblatt.png'), { format: 'image/jpeg', quality: 0.64, maxWidth: 1200, maxHeight: 1700 }),
+        loadImageAsDataUrl(resolveAssetUrl('logo.png'), { format: 'image/png', maxWidth: 800, maxHeight: 450 }),
+        loadImageAsDataUrl(resolveAssetUrl('homepagestatistik.png'), { format: 'image/png', maxWidth: 700, maxHeight: 700 }),
+        loadImageAsDataUrl(resolveAssetUrl('kfwablauf.png'), { format: 'image/jpeg', quality: 0.66, maxWidth: 1200, maxHeight: 1700 })
     ]);
 
     const doc = new jsPdfCtor({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, putOnlyUsedFonts: true });

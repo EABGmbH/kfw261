@@ -298,6 +298,33 @@
         if (unterschriftInput) unterschriftInput.value = [vorname, nachname].filter(Boolean).join(' ');
     }
 
+    function getScriptBaseUrl() {
+        var script = document.querySelector('script[src$="angebot.js"]');
+        if (script && script.src) {
+            try {
+                return new URL('.', script.src).toString();
+            } catch (_error) {
+                return '';
+            }
+        }
+
+        try {
+            return new URL('.', window.location.href).toString();
+        } catch (_error) {
+            return '';
+        }
+    }
+
+    function toBaseUrl(path) {
+        var baseUrl = getScriptBaseUrl();
+        if (!baseUrl) return path;
+        try {
+            return new URL(path, baseUrl).toString();
+        } catch (_error) {
+            return path;
+        }
+    }
+
     function getOfferApiEndpoint() {
         var meta = document.querySelector('meta[name="offer-api-base"]');
         var base = meta && meta.content ? String(meta.content).trim() : '';
@@ -306,7 +333,7 @@
             if (host === 'localhost' || host === '127.0.0.1') {
                 return 'http://localhost:3100/api/offer-request';
             }
-            return '/api/offer-request.php';
+            return toBaseUrl('api/offer-request.php');
         }
         return base.replace(/\/$/, '') + '/api/offer-request.php';
     }
@@ -360,7 +387,7 @@
             });
 
             if (!response.ok && !isLocalHost()) {
-                response = await fetch('/offer-request.php', {
+                response = await fetch(toBaseUrl('offer-request.php'), {
                     method: 'POST',
                     body: formData
                 });
