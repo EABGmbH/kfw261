@@ -26,21 +26,14 @@ jobs:
           IONOS_HOST: ${{ secrets.IONOS_FTP_SERVER }}
           IONOS_USER: ${{ secrets.IONOS_FTP_USERNAME }}
           IONOS_PASS: ${{ secrets.IONOS_FTP_PASSWORD }}
-          IONOS_DIR: ${{ secrets.IONOS_FTP_REMOTE_DIR }}
         run: |
-          set -euo pipefail
-
-          PRIMARY_DIR="${IONOS_DIR:-/wordpress/software/kfw261}"
-          PRIMARY_DIR="${PRIMARY_DIR%/}/"
+          REMOTE_DIR="/wordpress/software/kfw261/"
 
           lftp -u "$IONOS_USER","$IONOS_PASS" "sftp://$IONOS_HOST:22" <<EOF
-          set cmd:fail-exit yes
           set sftp:auto-confirm yes
           set net:max-retries 2
           set net:timeout 20
           set xfer:clobber on
-
-          mkdir -p "$PRIMARY_DIR"
           mirror -R --delete --verbose \
             --exclude-glob .git* \
             --exclude-glob .github \
@@ -50,8 +43,6 @@ jobs:
             --exclude-glob package-lock.json \
             --exclude-glob tsconfig.json \
             --exclude-glob README.md \
-            ./ "$PRIMARY_DIR"
-
-          cls -1 "$PRIMARY_DIR"
+            ./ "$REMOTE_DIR"
           bye
           EOF
