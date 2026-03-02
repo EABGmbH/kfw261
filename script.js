@@ -361,6 +361,47 @@ function getFoerderDaten(einschaetzung) {
     };
 }
 
+function getBaubegleitungFoerderung() {
+    const wohneinheiten = Number(wohneinheitenInput.value) || 1;
+
+    if (selectedBuildingType === 'mfh') {
+        if (wohneinheiten >= 3) {
+            const maxKredit = Math.min(4000 * wohneinheiten, 40000);
+            const maxZuschuss = Math.min(2000 * wohneinheiten, 20000);
+
+            return {
+                foerderfaehig: true,
+                regelLabel: 'Mehrfamilienhaus ab 3 Wohneinheiten',
+                maxKredit,
+                maxZuschuss
+            };
+        }
+
+        return {
+            foerderfaehig: false,
+            regelLabel: 'Mehrfamilienhaus unter 3 Wohneinheiten',
+            maxKredit: 0,
+            maxZuschuss: 0
+        };
+    }
+
+    if (selectedBuildingType === 'efh' || selectedBuildingType === 'efh-einlieger') {
+        return {
+            foerderfaehig: true,
+            regelLabel: 'Ein-/Zweifamilienhaus, DHH, Reihenhaus',
+            maxKredit: 10000,
+            maxZuschuss: 5000
+        };
+    }
+
+    return {
+        foerderfaehig: false,
+        regelLabel: 'Keine baubegleitungsrelevante Gebäudeart ausgewählt',
+        maxKredit: 0,
+        maxZuschuss: 0
+    };
+}
+
 function isWpbBonusFoerderfaehig(einschaetzung) {
     const stufe = einschaetzung?.stufe;
 
@@ -512,9 +553,10 @@ function renderFinanceSummary() {
 
     const foerderProzentEffektiv = foerder.percent + bonus.bonusGesamtEffektiv;
     const maxZuschussJeWEEffektiv = Math.round((foerder.maxKredit * foerderProzentEffektiv) / 100);
+    const baubegleitung = getBaubegleitungFoerderung();
 
-    const gesamtMaxKredit = foerder.maxKredit * wohneinheiten;
-    const gesamtMaxZuschuss = maxZuschussJeWEEffektiv * wohneinheiten;
+    const gesamtMaxKredit = (foerder.maxKredit * wohneinheiten) + baubegleitung.maxKredit;
+    const gesamtMaxZuschuss = (maxZuschussJeWEEffektiv * wohneinheiten) + baubegleitung.maxZuschuss;
 
     const bonusDropdowns = `
         <details class="info-dropdown wpb-dropdown" id="wpbDropdownInline">
@@ -534,6 +576,10 @@ function renderFinanceSummary() {
     const bonusKurztext = bonus.bonusGesamtEffektiv > 0
         ? `+${bonus.bonusGesamtEffektiv} % (WPB: ${bonus.wpbBonusRoh} % + Serielle Sanierung ${bonus.serialBonusRoh} % (Deckelung bei 20 %))`
         : '0 % (kein anrechenbarer Bonus)';
+
+    const baubegleitungHinweis = baubegleitung.foerderfaehig
+        ? ''
+        : `<div class="result-item"><span class="result-label">Baubegleitung</span><span class="result-value">Für diese Konstellation aktuell nicht förderfähig</span></div>`;
 
     financeSummaryCard.innerHTML = `
         <div class="result-item">
@@ -560,10 +606,19 @@ function renderFinanceSummary() {
             <span class="result-label">Max. Zuschuss je Wohneinheit</span>
             <span class="result-value">${formatEuro(maxZuschussJeWEEffektiv)}</span>
         </div>
+        <div class="result-item">
+            <span class="result-label">Baubegleitung max. Kredit (${baubegleitung.regelLabel})</span>
+            <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Baubegleitung max. Tilgungszuschuss</span>
+            <span class="result-value">${formatEuro(baubegleitung.maxZuschuss)}</span>
+        </div>
+        ${baubegleitungHinweis}
         <div class="tilgungszuschuss-highlight-box">
             <div class="tilgungszuschuss-highlight-icon">✅</div>
             <div class="tilgungszuschuss-highlight-content">
-                <p class="tilgungszuschuss-highlight-title">Ihr maximaler Tilgungszuschuss gesamt</p>
+                <p class="tilgungszuschuss-highlight-title">Ihr maximaler Tilgungszuschuss gesamt (inkl. Baubegleitung)</p>
                 <p class="tilgungszuschuss-highlight-value">${formatEuro(gesamtMaxZuschuss)}</p>
             </div>
         </div>
@@ -678,8 +733,11 @@ function getPdfSummaryData() {
     const einschaetzung = getEffizienzhausEinschaetzung();
     const foerder = getFoerderDaten(einschaetzung);
     const bonus = getBonusBerechnung();
+    const baubegleitung = getBaubegleitungFoerderung();
     const foerderProzentEffektiv = foerder.percent + bonus.bonusGesamtEffektiv;
     const maxZuschussJeWEEffektiv = Math.round((foerder.maxKredit * foerderProzentEffektiv) / 100);
+    const baseMaxKreditGesamt = foerder.maxKredit * wohneinheiten;
+    const baseMaxZuschussGesamt = maxZuschussJeWEEffektiv * wohneinheiten;
 
     return {
         gebaeudeart: getBuildingTypeLabel(selectedBuildingType),
@@ -702,8 +760,13 @@ function getPdfSummaryData() {
         klasse: foerder.klasse,
         maxKreditJeWE: foerder.maxKredit,
         maxZuschussJeWE: maxZuschussJeWEEffektiv,
-        maxKreditGesamt: foerder.maxKredit * wohneinheiten,
-        maxZuschussGesamt: maxZuschussJeWEEffektiv * wohneinheiten
+        baseMaxKreditGesamt,
+        baseMaxZuschussGesamt,
+        baubegleitungRegel: baubegleitung.regelLabel,
+        baubegleitungKredit: baubegleitung.maxKredit,
+        baubegleitungZuschuss: baubegleitung.maxZuschuss,
+        maxKreditGesamt: baseMaxKreditGesamt + baubegleitung.maxKredit,
+        maxZuschussGesamt: baseMaxZuschussGesamt + baubegleitung.maxZuschuss
     };
 }
 
@@ -791,7 +854,7 @@ async function generatePdfReport() {
     y += 6;
     doc.text(`Wärmeerzeuger: ${summary.heizung}`, leftMargin, y);
     y += 6;
-    doc.text(`Kredithöhe gesamt: ${formatEuro(summary.maxKreditGesamt)}`, leftMargin, y);
+    doc.text(`Kredithöhe gesamt inkl. Baubegleitung: ${formatEuro(summary.maxKreditGesamt)}`, leftMargin, y);
 
     y += 10;
     const boxX = 15;
@@ -815,7 +878,7 @@ async function generatePdfReport() {
     doc.setFontSize(8.8);
     drawKeyValueRow('Tilgungszuschuss je Wohneinheit:', `${summary.foerderProzent} % (${summary.klasse})`, boxX + 10, boxX + boxW - 10, y);
     y += 7;
-    drawKeyValueRow('Max. möglicher KfW-Kredit:', formatEuro(summary.maxKreditGesamt), boxX + 10, boxX + boxW - 10, y);
+    drawKeyValueRow('Max. möglicher Kredit inkl. Baubegleitung:', formatEuro(summary.maxKreditGesamt), boxX + 10, boxX + boxW - 10, y);
 
     y += 6;
     doc.setFillColor(239, 248, 243);
@@ -824,7 +887,7 @@ async function generatePdfReport() {
     doc.roundedRect(boxX + 6, y - 4.5, boxW - 12, 10, 1.6, 1.6, 'FD');
     doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
     doc.setFont('helvetica', 'normal');
-    doc.text('Max. Tilgungszuschuss gesamt:', boxX + 12, y + 1.9);
+    doc.text('Max. Tilgungszuschuss gesamt inkl. Baubegleitung:', boxX + 12, y + 1.9);
     doc.setFont('helvetica', 'bold');
     doc.text(`${formatEuro(summary.maxZuschussGesamt)}`, boxX + boxW - 12, y + 1.9, { align: 'right' });
 
@@ -878,7 +941,7 @@ async function generatePdfReport() {
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
-    doc.text('Ihr Tilgungszuschuss gesamt:', pageWidth / 2, subsidyAdvantageY + 7.5, { align: 'center' });
+    doc.text('Ihr Tilgungszuschuss gesamt inkl. Baubegleitung:', pageWidth / 2, subsidyAdvantageY + 7.5, { align: 'center' });
     doc.setFontSize(16);
     doc.text(`${formatEuro(summary.maxZuschussGesamt)}`, pageWidth / 2, subsidyAdvantageY + 15.2, { align: 'center' });
 
