@@ -783,6 +783,26 @@ body {
     border-top: 1px solid #d7e2dc;
 }
 
+.baubegleitung-box {
+    margin: 12px 0 14px;
+    padding: 14px 14px 10px;
+    border: 1px solid #cfe0d7;
+    border-radius: 10px;
+    background: #f7fbf9;
+}
+
+.baubegleitung-box h4 {
+    margin: 0 0 8px;
+    font-size: 1.02em;
+    color: #2f5d47;
+}
+
+.baubegleitung-hint {
+    margin: 8px 0 2px;
+    color: #5d6f66;
+    font-size: 0.95em;
+}
+
 .result-label {
     font-weight: 500;
     font-size: 1.1em;

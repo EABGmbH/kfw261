@@ -580,16 +580,31 @@ function renderFinanceSummary() {
 
     const baubegleitungHinweis = baubegleitung.foerderfaehig
         ? ''
-        : `<div class="result-item"><span class="result-label">Baubegleitung</span><span class="result-value">Für diese Konstellation aktuell nicht förderfähig</span></div>`;
+        : `<p class="baubegleitung-hint">Für diese Konstellation aktuell nicht förderfähig.</p>`;
+
+    const baubegleitungBlock = `
+        <div class="baubegleitung-box">
+            <h4>Baubegleitung (separat)</h4>
+            <div class="result-item">
+                <span class="result-label">Regelung</span>
+                <span class="result-value">${baubegleitung.regelLabel}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Baubegleitung max. Kredit</span>
+                <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Baubegleitung max. Tilgungszuschuss</span>
+                <span class="result-value">${formatEuro(baubegleitung.maxZuschuss)}</span>
+            </div>
+            ${baubegleitungHinweis}
+        </div>
+    `;
 
     financeSummaryCard.innerHTML = `
         <div class="result-item">
             <span class="result-label">Max. Kredit je Wohneinheit</span>
             <span class="result-value">${formatEuro(foerder.maxKredit)}</span>
-        </div>
-        <div class="result-item">
-            <span class="result-label">Baubegleitung max. Kredit (${baubegleitung.regelLabel})</span>
-            <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
         </div>
         <div class="result-item">
             <span class="result-label">Max. Kredit gesamt (ohne Baubegleitung)</span>
@@ -615,11 +630,8 @@ function renderFinanceSummary() {
             <span class="result-label">Max. Tilgungszuschuss gesamt (ohne Baubegleitung)</span>
             <span class="result-value">${formatEuro(basisMaxZuschussGesamt)}</span>
         </div>
-        <div class="result-item">
-            <span class="result-label">Baubegleitung max. Tilgungszuschuss</span>
-            <span class="result-value">${formatEuro(baubegleitung.maxZuschuss)}</span>
-        </div>
-        ${baubegleitungHinweis}
+        <div class="finance-separator" aria-hidden="true"></div>
+        ${baubegleitungBlock}
         <div class="tilgungszuschuss-highlight-box">
             <div class="tilgungszuschuss-highlight-icon">✅</div>
             <div class="tilgungszuschuss-highlight-content">
