@@ -7,11 +7,16 @@
     "node": ">=20"
   },
   "scripts": {
+    "offer:server": "node offer-server.js",
     "kfw:261": "tsx scripts/kfw/fetch-261.ts",
     "market:interhyp": "tsx scripts/market/fetch-interhyp.ts"
   },
   "dependencies": {
-    "cheerio": "^1.0.0"
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^6.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.14",

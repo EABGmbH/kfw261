@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="offer-api-base" content="" />
+    <title>Unverbindliches Angebot anfordern</title>
+    <link rel="stylesheet" href="angebot.css" />
+</head>
+<body class="offer-page-body" data-offer-step="1">
+    <main class="offer-page">
+        <section class="offer-card">
+            <div class="offer-header">
+                <h1>Unverbindliches Angebot anfordern</h1>
+                <p>Bitte füllen Sie die Checkliste in wenigen Schritten aus. Danach können Sie alles per E-Mail senden.</p>
+            </div>
+
+            <div class="offer-progress" aria-label="Fortschritt">
+                <div class="offer-progress-step active" data-step="1">1. Antragsteller</div>
+                <div class="offer-progress-step" data-step="2">2. Objekt</div>
+                <div class="offer-progress-step" data-step="3">3. Abschluss</div>
+            </div>
+
+            <div id="offer-global-status" class="offer-status" aria-live="polite"></div>
+
+            <form id="angebot-form" novalidate>
+                <section class="offer-step active" data-step="1">
+                    <h2>Persönliche Daten</h2>
+                    <div class="offer-grid two-col">
+                        <label class="offer-field-full">Firma
+                            <input id="firma" name="firma" type="text" autocomplete="organization" />
+                        </label>
+
+                        <label>Vorname *
+                            <input id="vorname" name="vorname" type="text" required autocomplete="given-name" />
+                        </label>
+                        <label>Nachname *
+                            <input id="nachname" name="nachname" type="text" required autocomplete="family-name" />
+                        </label>
+
+                        <label>Straße *
+                            <input id="strasse" name="strasse" type="text" required autocomplete="address-line1" />
+                        </label>
+                        <label>Hausnummer *
+                            <input id="hausnummer" name="hausnummer" type="text" required autocomplete="address-line2" />
+                        </label>
+
+                        <label>PLZ *
+                            <input id="plz" name="plz" type="text" required autocomplete="postal-code" />
+                        </label>
+                        <label>Ort *
+                            <input id="ort" name="ort" type="text" required autocomplete="address-level2" />
+                        </label>
+
+                        <label>E-Mail *
+                            <input id="email" name="email" type="email" required autocomplete="email" />
+                        </label>
+                        <label>Handy *
+                            <input id="handy" name="handy" type="tel" required autocomplete="tel" />
+                        </label>
+                    </div>
+
+                    <fieldset class="offer-fieldset">
+                        <legend>Anschrift des Investitionsstandorts identisch mit Kundenanschrift?</legend>
+                        <label class="radio-inline"><input type="radio" name="adresseIdentisch" value="ja" checked /> Ja</label>
+                        <label class="radio-inline"><input type="radio" name="adresseIdentisch" value="nein" /> Nein</label>
+                    </fieldset>
+
+                    <div id="invest-anschrift" class="offer-grid two-col conditional-panel hidden">
+                        <h3 class="offer-field-full">Anschrift des Investitionsstandorts</h3>
+                        <label>Straße *
+                            <input id="investStrasse" name="investStrasse" type="text" />
+                        </label>
+                        <label>Hausnummer *
+                            <input id="investHausnummer" name="investHausnummer" type="text" />
+                        </label>
+                        <label>PLZ *
+                            <input id="investPlz" name="investPlz" type="text" />
+                        </label>
+                        <label>Ort *
+                            <input id="investOrt" name="investOrt" type="text" />
+                        </label>
+                    </div>
+                </section>
+
+                <section class="offer-step" data-step="2">
+                    <h2>Daten zum Investitionsstandort</h2>
+
+                    <div class="question-block">
+                        <h3>Ist eine Lüftungsanlage geplant?</h3>
+                        <div class="toggle-group">
+                            <label class="toggle-option">
+                                <input type="radio" name="lueftungGeplant" value="ja" />
+                                <span>Ja</span>
+                            </label>
+                            <label class="toggle-option">
+                                <input type="radio" name="lueftungGeplant" value="nein" checked />
+                                <span>Nein</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="lueftung-daten" class="conditional-panel hidden">
+                        <h3>Welche Lüftungsanlage ist geplant?</h3>
+                        <div class="choice-card-grid two-col">
+                            <label class="choice-card">
+                                <input type="checkbox" id="lueftungZentral" name="lueftungArt" value="zentral" />
+                                <span class="choice-icon">🏢</span>
+                                <span class="choice-title">Zentral mit Wärmerückgewinnung</span>
+                            </label>
+                            <label class="choice-card">
+                                <input type="checkbox" id="lueftungDezentral" name="lueftungArt" value="dezentral" />
+                                <span class="choice-icon">🏠</span>
+                                <span class="choice-title">Dezentral mit Wärmerückgewinnung</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-block">
+                        <h3>Ist eine PV-Anlage geplant?</h3>
+                        <div class="toggle-group">
+                            <label class="toggle-option">
+                                <input type="radio" name="pvGeplant" value="ja" />
+                                <span>Ja</span>
+                            </label>
+                            <label class="toggle-option">
+                                <input type="radio" name="pvGeplant" value="nein" checked />
+                                <span>Nein</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="pv-daten" class="conditional-panel hidden">
+                        <div class="input-card">
+                            <label>Falls ja, wieviel kWp sind geplant?
+                                <input id="pvKwp" name="pvKwp" type="text" inputmode="decimal" placeholder="z. B. 9.5" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-block">
+                        <h3>Ist ein Batteriespeicher geplant?</h3>
+                        <div class="toggle-group">
+                            <label class="toggle-option">
+                                <input type="radio" name="speicherGeplant" value="ja" />
+                                <span>Ja</span>
+                            </label>
+                            <label class="toggle-option">
+                                <input type="radio" name="speicherGeplant" value="nein" checked />
+                                <span>Nein</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="speicher-daten" class="conditional-panel hidden">
+                        <div class="input-card">
+                            <label>Falls ja, wieviel kWh sind geplant?
+                                <input id="speicherKwh" name="speicherKwh" type="text" inputmode="decimal" placeholder="z. B. 8.0" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <label class="full-width">Eingabeplan des Hauses (PDF)
+                        <input id="eingabeplanPdf" name="eingabeplanPdf" type="file" accept="application/pdf,.pdf" />
+                    </label>
+
+                    <label class="full-width">Notizen
+                        <textarea id="notizen" name="notizen" rows="4" placeholder="Optional"></textarea>
+                    </label>
+                </section>
+
+                <section class="offer-step" data-step="3">
+                    <h2>Abschluss</h2>
+
+                    <div id="rechner-zusammenfassung" class="rechner-zusammenfassung"></div>
+
+                    <div class="offer-grid two-col">
+                        <label>Ort, Datum
+                            <input id="ortDatum" name="ortDatum" type="text" />
+                        </label>
+                        <label>Unterschrift (Name)
+                            <input id="unterschrift" name="unterschrift" type="text" />
+                        </label>
+                    </div>
+
+                    <label class="consent-label">
+                        <input id="bestaetigung" name="bestaetigung" type="checkbox" required />
+                        Hiermit bestätige ich die Richtigkeit und Vollständigkeit der Angaben.
+                    </label>
+                </section>
+
+                <div class="offer-nav">
+                    <button id="prev-btn" type="button" class="offer-nav-btn secondary" onclick="offerPrevStep()" style="display:none;">Zurück</button>
+                    <button id="next-btn" type="button" class="offer-nav-btn primary" onclick="offerNextStep()">Weiter</button>
+                    <button id="mail-btn" type="button" class="offer-submit-btn" onclick="offerSubmit()" style="display:none;">Angebot anfordern</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script src="angebot.js"></script>
+</body>
+</html>

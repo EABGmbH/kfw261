@@ -42,3 +42,20 @@ Dann läuft alles automatisch:
 2. Die JSON-Dateien werden in GitHub committed.
 3. Jeder Push auf `main` triggert den IONOS-Deploy-Workflow.
 4. Die Homepage liest die aktuellen Zinsen aus `data/kfw/261.json` und `data/market/interhyp_10y_ltv_gt90.json`.
+
+## Angebotsformular: E-Mail-Versand (lokal)
+
+Für `angebot.html` gibt es zwei Wege:
+
+- Produktion (IONOS Webspace): `POST /api/offer-request.php`
+- Lokal (Node): `POST http://localhost:3100/api/offer-request`
+
+1. `.env.example` nach `.env` kopieren und SMTP-Daten setzen.
+2. Server starten:
+   - `npm run offer:server`
+3. Formular lokal öffnen und absenden:
+   - `angebot.html` (sendet bei localhost automatisch an `http://localhost:3100/api/offer-request`)
+
+Health-Check:
+
+- `http://localhost:3100/api/health`
