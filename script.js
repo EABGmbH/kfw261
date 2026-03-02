@@ -584,7 +584,7 @@ function renderFinanceSummary() {
 
     const baubegleitungBlock = `
         <div class="baubegleitung-box">
-            <h4>Baubegleitung (separat)</h4>
+            <h4>Baubegleitung</h4>
             <div class="result-item">
                 <span class="result-label">Regelung</span>
                 <span class="result-value">${baubegleitung.regelLabel}</span>
