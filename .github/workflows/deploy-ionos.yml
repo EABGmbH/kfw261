@@ -1,0 +1,36 @@
+name: Deploy Website to IONOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP/FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.IONOS_FTP_SERVER }}
+          username: ${{ secrets.IONOS_FTP_USERNAME }}
+          password: ${{ secrets.IONOS_FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: ${{ secrets.IONOS_FTP_REMOTE_DIR }}
+          exclude: |
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/scripts/**
+            **/package.json
+            **/package-lock.json
+            **/tsconfig.json
+            **/README.md

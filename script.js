@@ -32,9 +32,13 @@ const serielleSanierungQuestionBlock = document.getElementById('serielleSanierun
 
 let selectedBuildingType = '';
 
-const KFW261_REFERENZ_ZINS = 2.26;
-const INTERHYP_REFERENZ_ZINS = 3.91;
+const DEFAULT_KFW261_REFERENZ_ZINS = 2.26;
+const DEFAULT_INTERHYP_REFERENZ_ZINS = 3.91;
 const ZINSVERGLEICH_DARLEHEN = 170000;
+
+let aktuelleKfw261ReferenzZins = DEFAULT_KFW261_REFERENZ_ZINS;
+let aktuelleInterhypReferenzZins = DEFAULT_INTERHYP_REFERENZ_ZINS;
+let zinsQuelleStandText = new Date().toLocaleDateString('de-DE');
 
 const huelleStufen = {
     1: {
@@ -409,6 +413,76 @@ function formatPercent(value) {
     return `${value.toFixed(2).replace('.', ',')} %`;
 }
 
+function asValidPercentOrFallback(value, fallback) {
+    if (typeof value !== 'number' || Number.isNaN(value) || value < 0 || value > 15) {
+        return fallback;
+    }
+
+    return value;
+}
+
+function formatStandDateForDisplay(value) {
+    if (typeof value !== 'string' || !value.trim()) {
+        return new Date().toLocaleDateString('de-DE');
+    }
+
+    const trimmed = value.trim();
+    const ddmmyyyyMatch = trimmed.match(/^\d{2}\.\d{2}\.\d{4}$/);
+    if (ddmmyyyyMatch) {
+        return trimmed;
+    }
+
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('de-DE');
+    }
+
+    return new Date().toLocaleDateString('de-DE');
+}
+
+async function loadDynamicRateReferences() {
+    const [kfwResult, interhypResult] = await Promise.allSettled([
+        fetch('data/kfw/261.json', { cache: 'no-store' }),
+        fetch('data/market/interhyp_10y_ltv_gt90.json', { cache: 'no-store' })
+    ]);
+
+    if (kfwResult.status === 'fulfilled' && kfwResult.value.ok) {
+        try {
+            const payload = await kfwResult.value.json();
+            const rates = Array.isArray(payload?.rates) ? payload.rates : [];
+            const target = rates.find((item) => item?.variant === '10/2/10');
+            const sollzins = Number(target?.sollzinsPercent);
+            aktuelleKfw261ReferenzZins = asValidPercentOrFallback(sollzins, DEFAULT_KFW261_REFERENZ_ZINS);
+
+            if (typeof payload?.stand === 'string' && payload.stand.trim()) {
+                zinsQuelleStandText = formatStandDateForDisplay(payload.stand);
+            }
+        } catch (error) {
+            console.warn('Konnte dynamische KfW-Zinsen nicht verarbeiten, nutze Fallback.', error);
+        }
+    }
+
+    if (interhypResult.status === 'fulfilled' && interhypResult.value.ok) {
+        try {
+            const payload = await interhypResult.value.json();
+            const interhypRate = Number(payload?.effectiveRatePercent);
+            aktuelleInterhypReferenzZins = asValidPercentOrFallback(interhypRate, DEFAULT_INTERHYP_REFERENZ_ZINS);
+
+            if (typeof payload?.updatedAt === 'string' && payload.updatedAt.trim()) {
+                zinsQuelleStandText = formatStandDateForDisplay(payload.updatedAt);
+            }
+        } catch (error) {
+            console.warn('Konnte dynamische Interhyp-Zinsen nicht verarbeiten, nutze Fallback.', error);
+        }
+    }
+
+    if (step4.classList.contains('active')) {
+        renderFinanceSummary();
+    } else {
+        renderZinsvergleichSection();
+    }
+}
+
 function renderZinsvergleichSection() {
     const kfwRateElement = document.getElementById('zinsKfw261Rate');
     const marketRateElement = document.getElementById('zinsInterhypRate');
@@ -420,16 +494,14 @@ function renderZinsvergleichSection() {
         return;
     }
 
-    const zinsVorteil = Math.max(0, INTERHYP_REFERENZ_ZINS - KFW261_REFERENZ_ZINS);
+    const zinsVorteil = Math.max(0, aktuelleInterhypReferenzZins - aktuelleKfw261ReferenzZins);
     const jahresErsparnis = ZINSVERGLEICH_DARLEHEN * (zinsVorteil / 100);
-    const now = new Date();
-    const stand = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(now);
 
-    kfwRateElement.textContent = formatPercent(KFW261_REFERENZ_ZINS);
-    marketRateElement.textContent = formatPercent(INTERHYP_REFERENZ_ZINS);
+    kfwRateElement.textContent = formatPercent(aktuelleKfw261ReferenzZins);
+    marketRateElement.textContent = formatPercent(aktuelleInterhypReferenzZins);
     vorteilPercentElement.textContent = `Ihr Vorteil: ${formatPercent(zinsVorteil)} günstigerer Zins!`;
     vorteilTextElement.textContent = `Bei ${formatEuro(ZINSVERGLEICH_DARLEHEN)} Darlehenssumme sparen Sie ca. ${formatEuro(jahresErsparnis)} Zinskosten pro Jahr.`;
-    standElement.textContent = `${stand.charAt(0).toUpperCase()}${stand.slice(1)}`;
+    standElement.textContent = zinsQuelleStandText;
 }
 
 function renderFinanceSummary() {
@@ -772,13 +844,13 @@ async function generatePdfReport() {
     y = zinsBoxY + 18;
     doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
     doc.setFontSize(8.8);
-    drawKeyValueRow('KfW-Förderkredit:', `${formatPercent(KFW261_REFERENZ_ZINS)} p.a.`, boxX + 10, boxX + boxW - 10, y);
+    drawKeyValueRow('KfW-Förderkredit:', `${formatPercent(aktuelleKfw261ReferenzZins)} p.a.`, boxX + 10, boxX + boxW - 10, y);
     y += 6;
-    drawKeyValueRow('Marktüblicher Zins (Interhyp):', `${formatPercent(INTERHYP_REFERENZ_ZINS)} p.a.`, boxX + 10, boxX + boxW - 10, y);
+    drawKeyValueRow('Marktüblicher Zins (Interhyp):', `${formatPercent(aktuelleInterhypReferenzZins)} p.a.`, boxX + 10, boxX + boxW - 10, y);
 
     y += 8;
-    const monthlyKfw = Math.round((summary.maxKreditGesamt * (KFW261_REFERENZ_ZINS / 100)) / 12);
-    const monthlyMarket = Math.round((summary.maxKreditGesamt * (INTERHYP_REFERENZ_ZINS / 100)) / 12);
+    const monthlyKfw = Math.round((summary.maxKreditGesamt * (aktuelleKfw261ReferenzZins / 100)) / 12);
+    const monthlyMarket = Math.round((summary.maxKreditGesamt * (aktuelleInterhypReferenzZins / 100)) / 12);
     const monthlySaving = Math.max(0, monthlyMarket - monthlyKfw);
 
     doc.setFont('helvetica', 'bold');
@@ -1068,3 +1140,7 @@ kfwForm.addEventListener('submit', (event) => {
 
 updateHuelleStageDisplay();
 updateStep2QuestionVisibility();
+loadDynamicRateReferences().catch((error) => {
+    console.warn('Dynamische Zinsdaten konnten nicht geladen werden. Fallback-Werte bleiben aktiv.', error);
+    renderZinsvergleichSection();
+});
