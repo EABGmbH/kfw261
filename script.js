@@ -555,8 +555,9 @@ function renderFinanceSummary() {
     const maxZuschussJeWEEffektiv = Math.round((foerder.maxKredit * foerderProzentEffektiv) / 100);
     const baubegleitung = getBaubegleitungFoerderung();
 
-    const gesamtMaxKredit = (foerder.maxKredit * wohneinheiten) + baubegleitung.maxKredit;
-    const gesamtMaxZuschuss = (maxZuschussJeWEEffektiv * wohneinheiten) + baubegleitung.maxZuschuss;
+    const basisMaxKreditGesamt = foerder.maxKredit * wohneinheiten;
+    const basisMaxZuschussGesamt = maxZuschussJeWEEffektiv * wohneinheiten;
+    const gesamtMaxZuschuss = basisMaxZuschussGesamt + baubegleitung.maxZuschuss;
 
     const bonusDropdowns = `
         <details class="info-dropdown wpb-dropdown" id="wpbDropdownInline">
@@ -591,8 +592,8 @@ function renderFinanceSummary() {
             <span class="result-value">${formatEuro(baubegleitung.maxKredit)}</span>
         </div>
         <div class="result-item">
-            <span class="result-label">Max. Kredit gesamt</span>
-            <span class="result-value">${formatEuro(gesamtMaxKredit)}</span>
+            <span class="result-label">Max. Kredit gesamt (ohne Baubegleitung)</span>
+            <span class="result-value">${formatEuro(basisMaxKreditGesamt)}</span>
         </div>
         <div class="result-item">
             <span class="result-label">Basis-Tilgungszuschuss</span>
@@ -603,12 +604,16 @@ function renderFinanceSummary() {
             <span class="result-value">${bonusKurztext}</span>
         </div>
         <div class="result-item">
-            <span class="result-label">Gesamter Tilgungszuschuss</span>
+            <span class="result-label">Gesamter Tilgungszuschuss (ohne Baubegleitung)</span>
             <span class="result-value">${foerderProzentEffektiv} %</span>
         </div>
         <div class="result-item">
             <span class="result-label">Max. Zuschuss je Wohneinheit</span>
             <span class="result-value">${formatEuro(maxZuschussJeWEEffektiv)}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Max. Tilgungszuschuss gesamt (ohne Baubegleitung)</span>
+            <span class="result-value">${formatEuro(basisMaxZuschussGesamt)}</span>
         </div>
         <div class="result-item">
             <span class="result-label">Baubegleitung max. Tilgungszuschuss</span>
@@ -765,7 +770,8 @@ function getPdfSummaryData() {
         baubegleitungRegel: baubegleitung.regelLabel,
         baubegleitungKredit: baubegleitung.maxKredit,
         baubegleitungZuschuss: baubegleitung.maxZuschuss,
-        maxKreditGesamt: baseMaxKreditGesamt + baubegleitung.maxKredit,
+        maxKreditGesamt: baseMaxKreditGesamt,
+        maxKreditGesamtMitBaubegleitung: baseMaxKreditGesamt + baubegleitung.maxKredit,
         maxZuschussGesamt: baseMaxZuschussGesamt + baubegleitung.maxZuschuss
     };
 }
@@ -854,7 +860,9 @@ async function generatePdfReport() {
     y += 6;
     doc.text(`Wärmeerzeuger: ${summary.heizung}`, leftMargin, y);
     y += 6;
-    doc.text(`Kredithöhe gesamt inkl. Baubegleitung: ${formatEuro(summary.maxKreditGesamt)}`, leftMargin, y);
+    doc.text(`Kredithöhe gesamt (ohne Baubegleitung): ${formatEuro(summary.maxKreditGesamt)}`, leftMargin, y);
+    y += 6;
+    doc.text(`Baubegleitung Kredit (separat): ${formatEuro(summary.baubegleitungKredit)}`, leftMargin, y);
 
     y += 10;
     const boxX = 15;
@@ -878,7 +886,7 @@ async function generatePdfReport() {
     doc.setFontSize(8.8);
     drawKeyValueRow('Tilgungszuschuss je Wohneinheit:', `${summary.foerderProzent} % (${summary.klasse})`, boxX + 10, boxX + boxW - 10, y);
     y += 7;
-    drawKeyValueRow('Max. möglicher Kredit inkl. Baubegleitung:', formatEuro(summary.maxKreditGesamt), boxX + 10, boxX + boxW - 10, y);
+    drawKeyValueRow('Max. möglicher Kredit (ohne Baubegleitung):', formatEuro(summary.maxKreditGesamt), boxX + 10, boxX + boxW - 10, y);
 
     y += 6;
     doc.setFillColor(239, 248, 243);
