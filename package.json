@@ -1,0 +1,21 @@
+{
+  "name": "kfw261-rates-fetcher",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "kfw:261": "tsx scripts/kfw/fetch-261.ts",
+    "market:interhyp": "tsx scripts/market/fetch-interhyp.ts"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

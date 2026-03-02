@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KfW 261 Fördermittelrechner</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <main class="two-column-layout">
+        <div class="unified-container">
+            <section class="calculator-wrapper">
+                <div class="container">
+                    <div class="calculator-card">
+                        <div class="progress-indicator">
+                            <div class="progress-step active" id="progressStep1">
+                                <div class="progress-dot">1</div>
+                                <div class="progress-label">Gebäudedaten</div>
+                            </div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step" id="progressStep2">
+                                <div class="progress-dot">2</div>
+                                <div class="progress-label">Vorhaben</div>
+                            </div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step" id="progressStep3">
+                                <div class="progress-dot">3</div>
+                                <div class="progress-label">Gebäudehülle</div>
+                            </div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step" id="progressStep4">
+                                <div class="progress-dot">4</div>
+                                <div class="progress-label">Überblick & Ergebnis</div>
+                            </div>
+                        </div>
+
+                        <form id="kfwForm" novalidate>
+                            <div class="form-step active" id="step1">
+                                <div class="form-section">
+                                    <h2>Schritt 1: Gebäudedaten</h2>
+
+                                    <label class="section-question">Welche Gebäudeart trifft zu?</label>
+                                    <div class="card-grid" id="gebaeudeartCards">
+                                        <button type="button" class="option-card" data-type="efh" data-units="1">
+                                            <span class="card-icon">🏠</span>
+                                            <span class="card-label">Einfamilienhaus</span>
+                                        </button>
+                                        <button type="button" class="option-card" data-type="efh-einlieger" data-units="2">
+                                            <span class="card-icon">🏡</span>
+                                            <span class="card-label">Einfamilienhaus inkl. Einliegerwohnung</span>
+                                        </button>
+                                        <button type="button" class="option-card" data-type="mfh" data-units="">
+                                            <span class="card-icon">🏢</span>
+                                            <span class="card-label">Mehrfamilienhaus</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="form-row-inline" id="gebaeudeDetails" style="display:none;">
+                                        <div class="form-group">
+                                            <label for="wohneinheiten">Anzahl der Wohneinheiten</label>
+                                            <div class="wohneinheiten-input-wrapper">
+                                                <span class="input-icon">#</span>
+                                                <input id="wohneinheiten" name="wohneinheiten" type="number" min="1" step="1" placeholder="z. B. 3" required />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="baujahr">Baujahr des Gebäudes</label>
+                                            <div class="baujahr-input-wrapper">
+                                                <span class="input-icon">📅</span>
+                                                <input id="baujahr" name="baujahr" type="number" min="1800" max="2100" placeholder="z. B. 1985" required />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="isfp-section" id="energieausweisSection" style="display:none;">
+                                        <label class="section-question">
+                                            Liegt für das Gebäude ein gültiger Energieausweis mit Effizienzklasse H vor?
+                                        </label>
+                                        <div class="radio-group radio-card-grid">
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="klasseH" value="ja" />
+                                                <span class="card-label">Ja</span>
+                                            </label>
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="klasseH" value="nein" />
+                                                <span class="card-label">Nein</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="step-navigation">
+                                    <button type="button" class="btn-navigate btn-next" id="nextBtn">Weiter</button>
+                                </div>
+                            </div>
+
+                            <div class="form-step" id="step2">
+                                <div class="form-section">
+                                    <h2>Schritt 2: Was möchten Sie sanieren?</h2>
+                                    <div class="focus-section">
+                                        <label class="section-question">Welche Heizung planen Sie nach der Sanierung?</label>
+                                        <div class="radio-group radio-card-grid radio-card-grid-wide heizung-row-grid">
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="heizungPlan" value="waermepumpe" />
+                                                <span class="card-icon">🌀</span>
+                                                <span class="card-label">Wärmepumpe</span>
+                                            </label>
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="heizungPlan" value="fernwaerme" />
+                                                <span class="card-icon">♨️</span>
+                                                <span class="card-label">Fernwärme</span>
+                                            </label>
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="heizungPlan" value="biomasse" />
+                                                <span class="card-icon">🌿</span>
+                                                <span class="card-label">Biomasse / Pellet</span>
+                                            </label>
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="heizungPlan" value="hybrid" />
+                                                <span class="card-icon">🔁</span>
+                                                <span class="card-label">Hybridlösung</span>
+                                            </label>
+                                            <label class="radio-label radio-card">
+                                                <input type="radio" name="heizungPlan" value="unsicher" />
+                                                <span class="card-icon">❓</span>
+                                                <span class="card-label">Sonstiges / unsicher</span>
+                                            </label>
+                                        </div>
+
+                                        <div id="lueftungQuestionBlock" style="display:none;">
+                                            <label class="section-question">Ist eine Lüftung geplant?</label>
+                                            <div class="radio-group radio-card-grid radio-card-grid-wide">
+                                                <label class="radio-label radio-card">
+                                                    <input type="radio" name="lueftungPlan" value="ja" />
+                                                    <span class="card-icon">✅</span>
+                                                    <span class="card-label">Ja</span>
+                                                </label>
+                                                <label class="radio-label radio-card">
+                                                    <input type="radio" name="lueftungPlan" value="nein" />
+                                                    <span class="card-icon">❌</span>
+                                                    <span class="card-label">Nein</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div id="serielleSanierungQuestionBlock" style="display:none;">
+                                            <label class="section-question">Ist eine serielle Sanierung geplant?</label>
+                                            <div class="radio-group radio-card-grid radio-card-grid-wide">
+                                                <label class="radio-label radio-card">
+                                                    <input type="radio" name="serielleSanierungPlan" value="ja" />
+                                                    <span class="card-icon">✅</span>
+                                                    <span class="card-label">Ja</span>
+                                                </label>
+                                                <label class="radio-label radio-card">
+                                                    <input type="radio" name="serielleSanierungPlan" value="nein" />
+                                                    <span class="card-icon">❌</span>
+                                                    <span class="card-label">Nein</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="step-navigation">
+                                    <button type="button" class="btn-navigate btn-previous" id="backToStep1Btn">Zurück</button>
+                                    <button type="button" class="btn-navigate btn-next" id="nextToStep3Btn">Weiter</button>
+                                </div>
+                            </div>
+
+                            <div class="form-step" id="step3">
+                                <div class="form-section">
+                                    <h2>Schritt 3: Gebäudehülle</h2>
+
+                                    <div class="focus-section">
+                                        <label class="section-question huelle-question">Wie weit möchten Sie bei der Gebäudehülle gehen?</label>
+                                        <div class="huelle-slider-box">
+                                            <div class="huelle-stage-current" id="huelleStageLabel"></div>
+                                            <div class="huelle-slider-head" aria-hidden="true">
+                                                <span>Stufe 1: wenig Eingriff</span>
+                                                <span>Stufe 6: maximal effizient</span>
+                                            </div>
+                                            <input type="range" id="huelleStufe" name="huelleStufe" min="1" max="6" step="1" value="3" />
+                                            <div class="huelle-slider-scale" aria-hidden="true">
+                                                <span>1</span>
+                                                <span>2</span>
+                                                <span>3</span>
+                                                <span>4</span>
+                                                <span>5</span>
+                                                <span>6</span>
+                                            </div>
+                                            <p class="huelle-stage-description" id="huelleStageDescription"></p>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="step-navigation">
+                                        <button type="button" class="btn-navigate btn-previous" id="backToStep2Btn">Zurück</button>
+                                        <button type="button" class="btn-navigate btn-next" id="nextToStep4Btn">Einschätzung anzeigen</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-step" id="step4">
+                                <div class="form-section">
+                                    <h2>Schritt 4: Ergebnis</h2>
+
+                                    <div class="ergebnis-summary-box">
+                                        <div class="kurz-erklaert-content" id="finalResultText"></div>
+                                    </div>
+
+                                    <div class="financial-box">
+                                        <h3>Finanzielle Orientierung (KfW 261)</h3>
+                                        <div class="result-card" id="financeSummaryCard"></div>
+
+                                        <div class="financial-table-wrapper">
+                                            <h4>Annuitätendarlehen (Orientierung)</h4>
+                                            <table class="financial-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Laufzeit</th>
+                                                        <th>Zinsbindung</th>
+                                                        <th>Tilgungsfreie Anlaufzeit</th>
+                                                        <th>Sollzins p.a. (effektiv)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>4 bis 10 Jahre</td>
+                                                        <td>10 Jahre</td>
+                                                        <td>1 bis 2 Jahre</td>
+                                                        <td>2,26 % (2,28 %)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>11 bis 20 Jahre</td>
+                                                        <td>10 Jahre</td>
+                                                        <td>1 bis 3 Jahre</td>
+                                                        <td>2,80 % (2,84 %)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>21 bis 30 Jahre</td>
+                                                        <td>10 Jahre</td>
+                                                        <td>1 bis 5 Jahre</td>
+                                                        <td>2,94 % (2,98 %)</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <section class="zinsvergleich-box" aria-label="Zinsvergleich KfW 261 und Marktzins">
+                                            <h4>💰 Zinsvergleich: KfW 261 vs. klassische Baufinanzierung</h4>
+                                            <p class="zinsvergleich-subtitle">Vergleich mit marktüblichen Zinssätzen (4-10 Jahre Laufzeit, 10 Jahre Zinsbindung, Beleihung &lt; 90%)</p>
+
+                                            <div class="zinsvergleich-cards">
+                                                <article class="zins-card zins-card-kfw">
+                                                    <div class="zins-card-title">🏦 KfW 261</div>
+                                                    <div class="zins-card-rate" id="zinsKfw261Rate">2,26 %</div>
+                                                    <div class="zins-card-caption">Sollzins p.a.</div>
+                                                </article>
+                                                <article class="zins-card zins-card-market">
+                                                    <div class="zins-card-title">🏛️ Interhyp (Markt)</div>
+                                                    <div class="zins-card-rate" id="zinsInterhypRate">3,91 %</div>
+                                                    <div class="zins-card-caption">Durchschnitt</div>
+                                                </article>
+                                            </div>
+
+                                            <div class="zinsvorteil-box">
+                                                <div class="zinsvorteil-icon">✅</div>
+                                                <div>
+                                                    <p class="zinsvorteil-title" id="zinsVorteilPercent">Ihr Vorteil: 1,65 % günstigerer Zins!</p>
+                                                    <p class="zinsvorteil-text" id="zinsVorteilText">Bei 170.000 € Darlehenssumme sparen Sie pro Jahr mehrere Tausend Euro.</p>
+                                                </div>
+                                            </div>
+
+                                            <p class="zinsvergleich-quelle">Quelle Marktdaten: <a href="https://www.interhyp.de" target="_blank" rel="noopener noreferrer">Interhyp</a> | Stand: <span id="zinsQuelleStand">18.2.2026</span></p>
+                                        </section>
+
+                                        <div class="cta-row">
+                                            <div class="cta-card cta-card-pdf">
+                                                <div class="cta-icon">📄</div>
+                                                <p class="cta-text">Jetzt kostenloses PDF anfordern – inklusive wichtiger Hinweise zur erfolgreichen Umsetzung</p>
+                                                <button type="button" class="cta-btn cta-btn-muted" id="downloadPdfBtn">Kostenloses PDF erstellen</button>
+                                            </div>
+
+                                            <div class="cta-card cta-card-offer">
+                                                <div class="cta-icon">🔥</div>
+                                                <p class="cta-text"><strong>Jetzt Energieberatung anfragen und direkt 10 % Nachlass sichern.</strong></p>
+                                                <a class="cta-btn cta-btn-primary" href="https://energy-advice-bavaria.de/kontakt/?tab=offer-tab-pane#section-79" target="_blank" rel="noopener noreferrer">Unverbindliches Angebot anfordern</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="step-navigation">
+                                    <button type="button" class="btn-navigate btn-previous" id="backToStep3Btn">Zurück</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
