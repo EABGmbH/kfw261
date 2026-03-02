@@ -22,7 +22,7 @@ jobs:
           server: ${{ secrets.IONOS_FTP_SERVER }}
           username: ${{ secrets.IONOS_FTP_USERNAME }}
           password: ${{ secrets.IONOS_FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           server-dir: ${{ secrets.IONOS_FTP_REMOTE_DIR }}/
           exclude: |
