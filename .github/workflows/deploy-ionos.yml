@@ -1,10 +1,13 @@
-name: Deploy Website to IONOS
+name: Deploy Rate JSON to IONOS
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+    paths:
+      - 'data/kfw/261.json'
+      - 'data/market/interhyp_10y_ltv_gt90.json'
 
 permissions:
   contents: read
@@ -26,23 +29,27 @@ jobs:
           IONOS_HOST: ${{ secrets.IONOS_FTP_SERVER }}
           IONOS_USER: ${{ secrets.IONOS_FTP_USERNAME }}
           IONOS_PASS: ${{ secrets.IONOS_FTP_PASSWORD }}
+          IONOS_DIR: ${{ secrets.IONOS_FTP_REMOTE_DIR }}
         run: |
-          REMOTE_DIR="/wordpress/software/kfw261/"
+          set -euo pipefail
+
+          BASE_DIR="${IONOS_DIR:-/wordpress/software/kfw261}"
+          BASE_DIR="${BASE_DIR%/}/"
 
           lftp -u "$IONOS_USER","$IONOS_PASS" "sftp://$IONOS_HOST:22" <<EOF
+          set cmd:fail-exit yes
           set sftp:auto-confirm yes
           set net:max-retries 2
           set net:timeout 20
           set xfer:clobber on
-          mirror -R --delete --verbose \
-            --exclude-glob .git* \
-            --exclude-glob .github \
-            --exclude-glob node_modules \
-            --exclude-glob scripts \
-            --exclude-glob package.json \
-            --exclude-glob package-lock.json \
-            --exclude-glob tsconfig.json \
-            --exclude-glob README.md \
-            ./ "$REMOTE_DIR"
+
+          mkdir -p "${BASE_DIR}data/kfw/"
+          mkdir -p "${BASE_DIR}data/market/"
+
+          put -O "${BASE_DIR}data/kfw/" "data/kfw/261.json"
+          put -O "${BASE_DIR}data/market/" "data/market/interhyp_10y_ltv_gt90.json"
+
+          cls -1 "${BASE_DIR}data/kfw/"
+          cls -1 "${BASE_DIR}data/market/"
           bye
           EOF
