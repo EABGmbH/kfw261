@@ -34,7 +34,7 @@ let selectedBuildingType = '';
 
 const DEFAULT_KFW261_REFERENZ_ZINS = 2.26;
 const DEFAULT_INTERHYP_REFERENZ_ZINS = 3.91;
-const ZINSVERGLEICH_DARLEHEN = 170000;
+const ZINSVERGLEICH_MIN_DARLEHEN = 100000;
 
 let aktuelleKfw261ReferenzZins = DEFAULT_KFW261_REFERENZ_ZINS;
 let aktuelleInterhypReferenzZins = DEFAULT_INTERHYP_REFERENZ_ZINS;
@@ -535,13 +535,22 @@ function renderZinsvergleichSection() {
         return;
     }
 
+    const wohneinheiten = Number(wohneinheitenInput?.value) || 1;
+    const einschaetzung = getEffizienzhausEinschaetzung();
+    const foerder = getFoerderDaten(einschaetzung);
+    const baubegleitung = getBaubegleitungFoerderung();
+    const vergleichsDarlehen = Math.max(
+        ZINSVERGLEICH_MIN_DARLEHEN,
+        (foerder.maxKredit * wohneinheiten) + baubegleitung.maxKredit
+    );
+
     const zinsVorteil = Math.max(0, aktuelleInterhypReferenzZins - aktuelleKfw261ReferenzZins);
-    const jahresErsparnis = ZINSVERGLEICH_DARLEHEN * (zinsVorteil / 100);
+    const jahresErsparnis = vergleichsDarlehen * (zinsVorteil / 100);
 
     kfwRateElement.textContent = formatPercent(aktuelleKfw261ReferenzZins);
     marketRateElement.textContent = formatPercent(aktuelleInterhypReferenzZins);
     vorteilPercentElement.textContent = `Ihr Vorteil: ${formatPercent(zinsVorteil)} günstigerer Zins!`;
-    vorteilTextElement.textContent = `Bei ${formatEuro(ZINSVERGLEICH_DARLEHEN)} Darlehenssumme sparen Sie ca. ${formatEuro(jahresErsparnis)} Zinskosten pro Jahr.`;
+    vorteilTextElement.textContent = `Bei ${formatEuro(vergleichsDarlehen)} Darlehenssumme (inkl. Baubegleitung) sparen Sie ca. ${formatEuro(jahresErsparnis)} Zinskosten pro Jahr.`;
     standElement.textContent = zinsQuelleStandText;
 }
 
