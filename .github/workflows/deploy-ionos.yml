@@ -16,21 +16,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.IONOS_FTP_SERVER }}
-          username: ${{ secrets.IONOS_FTP_USERNAME }}
-          password: ${{ secrets.IONOS_FTP_PASSWORD }}
-          protocol: sftp
-          port: 22
-          server-dir: ${{ secrets.IONOS_FTP_REMOTE_DIR }}/
-          exclude: |
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            **/scripts/**
-            **/package.json
-            **/package-lock.json
-            **/tsconfig.json
-            **/README.md
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy via SFTP (IONOS)
+        env:
+          IONOS_HOST: ${{ secrets.IONOS_FTP_SERVER }}
+          IONOS_USER: ${{ secrets.IONOS_FTP_USERNAME }}
+          IONOS_PASS: ${{ secrets.IONOS_FTP_PASSWORD }}
+          IONOS_DIR: ${{ secrets.IONOS_FTP_REMOTE_DIR }}
+        run: |
+          REMOTE_DIR="${IONOS_DIR%/}/"
+
+          lftp -u "$IONOS_USER","$IONOS_PASS" "sftp://$IONOS_HOST:22" <<EOF
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 20
+          set xfer:clobber on
+          mirror -R --delete --verbose \
+            --exclude-glob .git* \
+            --exclude-glob .github \
+            --exclude-glob node_modules \
+            --exclude-glob scripts \
+            --exclude-glob package.json \
+            --exclude-glob package-lock.json \
+            --exclude-glob tsconfig.json \
+            --exclude-glob README.md \
+            ./ "$REMOTE_DIR"
+          bye
+          EOF
