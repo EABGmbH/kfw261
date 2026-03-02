@@ -45,6 +45,8 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
           git add data/market/interhyp_10y_ltv_gt90.json
           git commit -m "chore(data): update interhyp rate"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
