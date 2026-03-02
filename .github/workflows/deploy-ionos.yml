@@ -24,7 +24,7 @@ jobs:
           password: ${{ secrets.IONOS_FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          server-dir: ${{ secrets.IONOS_FTP_REMOTE_DIR }}
+          server-dir: ${{ secrets.IONOS_FTP_REMOTE_DIR }}/
           exclude: |
             **/.git*/**
             **/.github/**
