@@ -881,7 +881,7 @@ async function generatePdfReport() {
     const boxW = pageWidth - 30;
 
     const subsidyBoxY = y;
-    const subsidyBoxH = 44;
+    const subsidyBoxH = 52;
     doc.setDrawColor(colors.line[0], colors.line[1], colors.line[2]);
     doc.setLineWidth(0.5);
     doc.rect(boxX, subsidyBoxY, boxW, subsidyBoxH);
@@ -899,6 +899,8 @@ async function generatePdfReport() {
     drawKeyValueRow('Tilgungszuschuss je Wohneinheit:', `${summary.foerderProzent} % (${summary.klasse})`, boxX + 10, boxX + boxW - 10, y);
     y += 7;
     drawKeyValueRow('Max. möglicher Kredit (ohne Baubegleitung):', formatEuro(summary.maxKreditGesamt), boxX + 10, boxX + boxW - 10, y);
+    y += 7;
+    drawKeyValueRow('Kredit für Baubegleitung (separat):', formatEuro(summary.baubegleitungKredit), boxX + 10, boxX + boxW - 10, y);
 
     y += 6;
     doc.setFillColor(239, 248, 243);
@@ -907,7 +909,7 @@ async function generatePdfReport() {
     doc.roundedRect(boxX + 6, y - 4.5, boxW - 12, 10, 1.6, 1.6, 'FD');
     doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
     doc.setFont('helvetica', 'normal');
-    doc.text('Max. Tilgungszuschuss gesamt inkl. Baubegleitung:', boxX + 12, y + 1.9);
+    doc.text('Tilgungszuschuss gesamt (inkl. Baubegleitung):', boxX + 12, y + 1.9);
     doc.setFont('helvetica', 'bold');
     doc.text(`${formatEuro(summary.maxZuschussGesamt)}`, boxX + boxW - 12, y + 1.9, { align: 'right' });
 
