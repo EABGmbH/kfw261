@@ -53,13 +53,13 @@ jobs:
           set net:timeout 20
           set xfer:clobber on
 
-          mkdir -p "${BASE_DIR}data/kfw/"
-          mkdir -p "${BASE_DIR}data/market/"
+          mkdir -fp "${BASE_DIR}data/kfw/"
+          mkdir -fp "${BASE_DIR}data/market/"
 
           put -O "${BASE_DIR}data/kfw/" "data/kfw/261.json"
           put -O "${BASE_DIR}data/market/" "data/market/interhyp_10y_ltv_gt90.json"
 
-          mkdir -p "${BASE_DIR}api/"
+          mkdir -fp "${BASE_DIR}api/"
           put -O "${BASE_DIR}" "index.html"
           put -O "${BASE_DIR}" "angebot.html"
           put -O "${BASE_DIR}" "angebot.js"
