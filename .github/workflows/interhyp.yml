@@ -3,7 +3,6 @@ name: Update Interhyp Rate
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 7 * * *'
     - cron: '20 8 * * *'
 
 permissions:
@@ -13,14 +12,6 @@ jobs:
   update-interhyp:
     runs-on: ubuntu-latest
     steps:
-      - name: Run only at 09:20 Europe/Berlin
-        run: |
-          NOW=$(TZ=Europe/Berlin date +"%H:%M")
-          if [ "$NOW" != "09:20" ]; then
-            echo "Skip run at $NOW Europe/Berlin"
-            exit 0
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 

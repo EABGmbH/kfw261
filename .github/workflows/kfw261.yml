@@ -3,8 +3,7 @@ name: Update KfW 261 Rates
 on:
   workflow_dispatch:
   schedule:
-    - cron: '5 7 * * *'
-    - cron: '5 8 * * *'
+    - cron: '0 8 * * *'
 
 permissions:
   contents: write
@@ -13,14 +12,6 @@ jobs:
   update-kfw-261:
     runs-on: ubuntu-latest
     steps:
-      - name: Run only at 09:05 Europe/Berlin
-        run: |
-          NOW=$(TZ=Europe/Berlin date +"%H:%M")
-          if [ "$NOW" != "09:05" ]; then
-            echo "Skip run at $NOW Europe/Berlin"
-            exit 0
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
