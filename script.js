@@ -27,13 +27,17 @@ const huelleStufeInput = document.getElementById('huelleStufe');
 const huelleStageLabel = document.getElementById('huelleStageLabel');
 const huelleStageDescription = document.getElementById('huelleStageDescription');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+const offerRequestBtn = document.getElementById('offerRequestBtn');
 const lueftungQuestionBlock = document.getElementById('lueftungQuestionBlock');
 const serielleSanierungQuestionBlock = document.getElementById('serielleSanierungQuestionBlock');
 
+const OFFER_CALCULATOR_PDF_STORAGE_KEY = 'kfw261_offer_calculator_pdf_v1';
+const OFFER_BUILDING_DATA_KEY = 'kfw261_offer_building_data_v1';
+
 let selectedBuildingType = '';
 
-const DEFAULT_KFW261_REFERENZ_ZINS = 2.26;
-const DEFAULT_INTERHYP_REFERENZ_ZINS = 3.91;
+const DEFAULT_KFW261_REFERENZ_ZINS = 2.51;
+const DEFAULT_INTERHYP_REFERENZ_ZINS = 3.96;
 const ZINSVERGLEICH_MIN_DARLEHEN = 100000;
 
 let aktuelleKfw261ReferenzZins = DEFAULT_KFW261_REFERENZ_ZINS;
@@ -41,7 +45,7 @@ let aktuelleInterhypReferenzZins = DEFAULT_INTERHYP_REFERENZ_ZINS;
 let zinsQuelleStandText = new Date().toLocaleDateString('de-DE');
 
 function getScriptBaseUrl() {
-    const script = document.querySelector('script[src$="script.js"]');
+    const script = document.querySelector('script[src*="script.js"]');
     if (script && script.src) {
         try {
             return new URL('.', script.src).toString();
@@ -832,14 +836,16 @@ function drawWrappedText(doc, text, x, y, maxWidth, lineHeight = 6) {
 }
 
 async function generatePdfReport() {
+    const options = arguments.length > 0 && arguments[0] ? arguments[0] : {};
+    const download = options.download !== false;
     const jsPdfCtor = window.jspdf?.jsPDF;
     if (!jsPdfCtor) {
         alert('PDF-Bibliothek wurde nicht geladen. Bitte Seite neu laden.');
-        return;
+        return null;
     }
 
     if (!validateStep1() || !validateStep2() || !validateStep3()) {
-        return;
+        return null;
     }
 
     const [titleImage, logoImage, qrImage, ablaufImage] = await Promise.all([
@@ -1066,7 +1072,61 @@ async function generatePdfReport() {
     const linkHeight = 107.11 - 101.61;
     doc.link(linkX, linkY, linkWidth, linkHeight, { url: 'https://www.energy-advice-bavaria.de' });
 
-    doc.save(`kfw261-zusammenfassung-${new Date().toISOString().slice(0, 10)}.pdf`);
+    const fileName = `kfw261-zusammenfassung-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const blob = doc.output('blob');
+
+    if (download) {
+        doc.save(fileName);
+    }
+
+    return new File([blob], fileName, { type: 'application/pdf' });
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = String(reader.result || '');
+            const marker = 'base64,';
+            const index = result.indexOf(marker);
+            if (index === -1) {
+                reject(new Error('PDF konnte nicht kodiert werden.'));
+                return;
+            }
+
+            resolve(result.slice(index + marker.length));
+        };
+        reader.onerror = () => reject(new Error('Datei konnte nicht gelesen werden.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function storeCalculatorPdfForOfferForm() {
+    const pdfFile = await generatePdfReport({ download: false });
+    if (!pdfFile) {
+        return false;
+    }
+
+    try {
+        const base64 = await fileToBase64(pdfFile);
+        sessionStorage.setItem(OFFER_CALCULATOR_PDF_STORAGE_KEY, JSON.stringify({
+            name: pdfFile.name,
+            type: pdfFile.type || 'application/pdf',
+            base64,
+            createdAt: new Date().toISOString()
+        }));
+
+        const gebaeudetypMap = { 'efh': 'einfamilienhaus', 'efh-einlieger': 'einfamilienhaus-einlieger', 'mfh': 'mehrfamilienhaus' };
+        sessionStorage.setItem(OFFER_BUILDING_DATA_KEY, JSON.stringify({
+            gebaeudetyp: gebaeudetypMap[selectedBuildingType] || selectedBuildingType,
+            wohneinheiten: wohneinheitenInput.value || ''
+        }));
+    } catch (error) {
+        console.warn('Konnte PDF nicht für Angebotsformular speichern.', error);
+        return false;
+    }
+
+    return true;
 }
 
 function renderFinalResult() {
@@ -1252,6 +1312,33 @@ if (downloadPdfBtn) {
         } finally {
             downloadPdfBtn.disabled = false;
             downloadPdfBtn.textContent = originalText;
+        }
+    });
+}
+
+if (offerRequestBtn) {
+    offerRequestBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const originalText = offerRequestBtn.textContent;
+        offerRequestBtn.style.pointerEvents = 'none';
+        offerRequestBtn.textContent = 'PDF wird vorbereitet...';
+
+        try {
+            const ok = await storeCalculatorPdfForOfferForm();
+            if (!ok) {
+                alert('Die Rechner-PDF konnte nicht vorbereitet werden. Bitte prüfen Sie die Eingaben und versuchen Sie es erneut.');
+                return;
+            }
+
+            const href = offerRequestBtn.getAttribute('href') || 'angebot.html';
+            window.location.href = href;
+        } catch (error) {
+            console.error(error);
+            alert('Beim Vorbereiten der PDF ist ein Fehler aufgetreten. Bitte erneut versuchen.');
+        } finally {
+            offerRequestBtn.style.pointerEvents = '';
+            offerRequestBtn.textContent = originalText;
         }
     });
 }

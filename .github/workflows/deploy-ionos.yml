@@ -8,6 +8,7 @@ on:
     paths:
       - 'data/kfw/261.json'
       - 'data/market/interhyp_10y_ltv_gt90.json'
+      - 'index.html'
       - 'angebot.html'
       - 'angebot.js'
       - 'angebot.css'
@@ -59,6 +60,7 @@ jobs:
           put -O "${BASE_DIR}data/market/" "data/market/interhyp_10y_ltv_gt90.json"
 
           mkdir -p "${BASE_DIR}api/"
+          put -O "${BASE_DIR}" "index.html"
           put -O "${BASE_DIR}" "angebot.html"
           put -O "${BASE_DIR}" "angebot.js"
           put -O "${BASE_DIR}" "angebot.css"
