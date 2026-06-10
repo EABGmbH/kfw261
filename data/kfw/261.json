@@ -1,32 +1,32 @@
 {
   "source": "https://www.kfw-formularsammlung.de/KonditionenanzeigerINet/KonditionenAnzeiger",
-  "stand": "08.06.2026",
-  "updatedAt": "2026-06-09T09:08:56.112Z",
+  "stand": "10.06.2026",
+  "updatedAt": "2026-06-10T09:14:31.682Z",
   "program": 261,
   "rates": [
     {
       "variant": "10/2/10",
-      "sollzinsPercent": 2.86,
-      "effektivzinsPercent": 2.9,
+      "sollzinsPercent": 2.95,
+      "effektivzinsPercent": 2.99,
       "auszahlungPercent": 100,
       "bereitstellungsprovPercentPerMonth": 0.15,
-      "gueltigAb": "28.05.2026"
+      "gueltigAb": "10.06.2026"
     },
     {
       "variant": "20/3/10",
-      "sollzinsPercent": 3.28,
-      "effektivzinsPercent": 3.33,
+      "sollzinsPercent": 3.35,
+      "effektivzinsPercent": 3.4,
       "auszahlungPercent": 100,
       "bereitstellungsprovPercentPerMonth": 0.15,
-      "gueltigAb": "28.05.2026"
+      "gueltigAb": "10.06.2026"
     },
     {
       "variant": "30/5/10",
-      "sollzinsPercent": 3.38,
-      "effektivzinsPercent": 3.43,
+      "sollzinsPercent": 3.45,
+      "effektivzinsPercent": 3.51,
       "auszahlungPercent": 100,
       "bereitstellungsprovPercentPerMonth": 0.15,
-      "gueltigAb": "28.05.2026"
+      "gueltigAb": "10.06.2026"
     }
   ]
 }
